@@ -1,13 +1,2024 @@
-<!doctype html>
+Hai ragione, scusa. Ti restituisco direttamente il file completo `index.html` corretto, con la mappa Leaflet funzionante e integrata nel layout.
+
+```html
+<!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OneWay — Itinerari di viaggio condivisi</title>
-    <meta name="description" content="OneWay è una piattaforma travel-tech per esplorare, creare e condividere itinerari turistici interattivi." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OneWay — Itinerari di viaggio condivisi</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <style>
+    :root {
+      --bg: #070b12;
+      --bg-soft: #0c1220;
+      --card: rgba(17, 25, 40, 0.86);
+      --card-solid: #111927;
+      --border: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.22);
+      --text: #f5f7fb;
+      --muted: #9aa4b8;
+      --muted-2: #6f7b90;
+      --orange: #ff7a18;
+      --orange-2: #ff9f1c;
+      --blue: #1d9bf0;
+      --green: #55d37a;
+      --purple: #a56eff;
+      --red: #ff4d4d;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --nav-height: 82px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 122, 24, 0.18), transparent 34%),
+        radial-gradient(circle at 80% 0%, rgba(29, 155, 240, 0.13), transparent 32%),
+        linear-gradient(180deg, #05070c 0%, #0a0f1a 48%, #05070c 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app-shell {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 22px 22px 112px;
+    }
+
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      display: grid;
+      grid-template-columns: auto minmax(220px, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 22px;
+      padding: 14px 16px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: rgba(7, 11, 18, 0.82);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(255, 122, 24, 0.14);
+      border: 1px solid rgba(255, 122, 24, 0.4);
+      color: var(--orange);
+      font-size: 22px;
+      box-shadow: 0 0 28px rgba(255, 122, 24, 0.25);
+    }
+
+    .brand h1 {
+      font-size: clamp(1.45rem, 2vw, 2.1rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-wrap i {
+      position: absolute;
+      left: 17px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted-2);
+      pointer-events: none;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 48px;
+      padding: 0 18px 0 46px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      outline: none;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      transition: 0.25s ease;
+    }
+
+    .search-wrap input:focus {
+      border-color: rgba(255, 122, 24, 0.55);
+      box-shadow: 0 0 0 4px rgba(255, 122, 24, 0.12);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      transition: 0.22s ease;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 122, 24, 0.38);
+      background: rgba(255, 122, 24, 0.1);
+    }
+
+    .notification-dot {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      right: 11px;
+      top: 10px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.12);
+    }
+
+    .user-mini {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 122, 24, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .user-mini img,
+    .author-photo img,
+    .review-avatar img,
+    .tip-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .left-stack,
+    .right-stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(12, 18, 32, 0.96), rgba(7, 11, 18, 0.96)),
+        radial-gradient(circle at top, rgba(255, 122, 24, 0.2), transparent 38%);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-top {
+      position: relative;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      padding: 24px;
+    }
+
+    .author-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .author-photo {
+      width: 78px;
+      height: 78px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 122, 24, 0.85);
+      box-shadow: 0 0 0 7px rgba(255, 122, 24, 0.12);
+      background: #222;
+    }
+
+    .author-info h2 {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      letter-spacing: -0.035em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--orange), var(--orange-2));
+      box-shadow: 0 10px 24px rgba(255, 122, 24, 0.3);
+    }
+
+    .meta-line {
+      margin-top: 5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .rating-line {
+      margin-top: 9px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: #ffc247;
+      font-weight: 800;
+    }
+
+    .rating-line span {
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .itinerary-title h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(2rem, 4vw, 3.35rem);
+      line-height: 1;
+      letter-spacing: -0.07em;
+    }
+
+    .itinerary-title p {
+      margin-top: 8px;
+      color: #c4cada;
+      font-size: 1.02rem;
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      transition: 0.2s ease;
+    }
+
+    .stat-pill:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-pill.orange i { color: var(--orange); }
+    .stat-pill.blue i { color: var(--blue); }
+    .stat-pill.green i { color: var(--green); }
+    .stat-pill.purple i { color: var(--purple); }
+
+    .stat-text small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .stat-text strong {
+      display: block;
+      font-size: 0.92rem;
+      line-height: 1.1;
+    }
+
+    .quick-actions {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .action-btn {
+      min-width: 88px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+      transition: 0.22s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 122, 24, 0.12);
+      border-color: rgba(255, 122, 24, 0.42);
+    }
+
+    .action-btn:active,
+    .primary-btn:active,
+    .secondary-btn:active {
+      transform: scale(0.96);
+    }
+
+    .action-btn.active {
+      background: rgba(255, 122, 24, 0.18);
+      border-color: rgba(255, 122, 24, 0.55);
+      color: var(--orange-2);
+    }
+
+    .map-shell {
+      position: relative;
+      height: 620px;
+      margin: 0 24px 24px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #0a101b;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 620px;
+      background: #0a101b;
+      z-index: 1;
+    }
+
+    .map-overlay {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 500;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .map-overlay > * {
+      pointer-events: auto;
+    }
+
+    .floating-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 16px;
+      border-radius: 18px;
+      color: var(--text);
+      background: rgba(11, 17, 29, 0.84);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.32);
+      font-weight: 700;
+      transition: 0.22s ease;
+    }
+
+    .floating-chip:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 122, 24, 0.38);
+    }
+
+    .traffic-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .switch {
+      width: 40px;
+      height: 22px;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      transition: 0.2s ease;
+    }
+
+    .switch span {
+      display: block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #cfd6e5;
+      transition: 0.2s ease;
+    }
+
+    .switch.active {
+      background: rgba(255, 122, 24, 0.75);
+    }
+
+    .switch.active span {
+      transform: translateX(18px);
+      background: #fff;
+    }
+
+    .leaflet-container {
+      font-family: inherit;
+      background: #080d16;
+    }
+
+    .leaflet-control-zoom {
+      border: none !important;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28) !important;
+    }
+
+    .leaflet-control-zoom a {
+      background: rgba(12, 18, 32, 0.94) !important;
+      color: #fff !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 18px;
+      background: rgba(13, 20, 34, 0.97);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(16px);
+    }
+
+    .leaflet-popup-tip {
+      background: rgba(13, 20, 34, 0.97);
+    }
+
+    .leaflet-popup-content {
+      margin: 14px 16px;
+      min-width: 210px;
+    }
+
+    .popup-title {
+      font-weight: 900;
+      font-size: 1rem;
+      margin-bottom: 7px;
+    }
+
+    .popup-meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .popup-desc {
+      color: #dce2ee;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .popup-rating {
+      margin-top: 9px;
+      color: #ffc247;
+      font-weight: 800;
+    }
+
+    .number-marker {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--orange), #ff4f00);
+      border: 3px solid rgba(255, 255, 255, 0.92);
+      box-shadow:
+        0 0 0 6px rgba(255, 122, 24, 0.2),
+        0 12px 24px rgba(0, 0, 0, 0.42);
+    }
+
+    .custom-number-marker {
+      background: transparent;
+      border: none;
+    }
+
+    .panel-card {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(17, 25, 40, 0.9), rgba(10, 15, 26, 0.9));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+
+    .panel-padding {
+      padding: 22px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title h3 {
+      font-size: 1.25rem;
+      letter-spacing: -0.035em;
+    }
+
+    .section-title a,
+    .section-title button {
+      color: var(--muted);
+      background: transparent;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .section-title a:hover,
+    .section-title button:hover {
+      color: var(--orange);
+    }
+
+    .filters {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 13px;
+      scrollbar-width: none;
+    }
+
+    .filters::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-btn {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--border);
+      font-weight: 800;
+      transition: 0.2s ease;
+      font-size: 0.88rem;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 122, 24, 0.35);
+    }
+
+    .filter-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(255, 122, 24, 0.95), rgba(255, 159, 28, 0.9));
+      border-color: transparent;
+      box-shadow: 0 12px 22px rgba(255, 122, 24, 0.22);
+    }
+
+    .stops-list {
+      display: grid;
+      gap: 10px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .stops-list::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .stops-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+    }
+
+    .stop-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 13px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--border);
+      transition: 0.22s ease;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .stop-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.082);
+      border-color: rgba(255, 122, 24, 0.36);
+    }
+
+    .stop-card.selected {
+      background: rgba(255, 122, 24, 0.14);
+      border-color: rgba(255, 122, 24, 0.58);
+      box-shadow: 0 14px 30px rgba(255, 122, 24, 0.12);
+    }
+
+    .stop-num {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--orange), #ff4f00);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(255, 122, 24, 0.3);
+    }
+
+    .stop-main strong {
+      display: block;
+      font-size: 0.96rem;
+      line-height: 1.2;
+    }
+
+    .stop-main span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.3;
+    }
+
+    .stop-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--orange-2);
+      border: 1px solid var(--border);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      position: relative;
+      min-height: 235px;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: #151d2e;
+      box-shadow: 0 20px 42px rgba(0, 0, 0, 0.28);
+      transition: 0.25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 122, 24, 0.38);
+    }
+
+    .feature-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.02);
+      transition: 0.4s ease;
+    }
+
+    .feature-card:hover .feature-bg {
+      transform: scale(1.08);
+    }
+
+    .feature-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, transparent 18%, rgba(0, 0, 0, 0.84) 100%),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent);
+    }
+
+    .feature-content {
+      position: absolute;
+      z-index: 2;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+    }
+
+    .feature-content h4 {
+      font-size: 1.08rem;
+      letter-spacing: -0.025em;
+    }
+
+    .feature-content p {
+      margin-top: 4px;
+      color: #d5dbea;
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .feature-rating {
+      margin-top: 9px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #ffc247;
+      font-weight: 900;
+    }
+
+    .feature-tag {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 3;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(8, 13, 22, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--green);
+      backdrop-filter: blur(10px);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .author-tip {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .tip-avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 122, 24, 0.65);
+    }
+
+    .quote {
+      color: #e8edf6;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .quote i {
+      color: rgba(255, 255, 255, 0.25);
+      margin-right: 4px;
+    }
+
+    .weather-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .weather-icon {
+      font-size: 3rem;
+      color: #ffc247;
+      filter: drop-shadow(0 0 20px rgba(255, 194, 71, 0.3));
+    }
+
+    .weather-main strong {
+      display: block;
+      font-size: 2.3rem;
+      line-height: 1;
+      letter-spacing: -0.06em;
+    }
+
+    .weather-main span {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .weather-meta {
+      margin-top: 13px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .weather-meta b {
+      color: #fff;
+    }
+
+    .reviews-grid {
+      display: grid;
+      gap: 13px;
+    }
+
+    .review-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 13px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--border);
+    }
+
+    .review-avatar {
+      width: 46px;
+      height: 46px;
+      overflow: hidden;
+      border-radius: 15px;
+      border: 1px solid var(--border-strong);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .review-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .review-head strong {
+      font-size: 0.94rem;
+    }
+
+    .stars {
+      color: #ffc247;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .review-card p {
+      color: #cfd6e5;
+      line-height: 1.45;
+      font-size: 0.9rem;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 15px;
+      font-weight: 850;
+      transition: 0.22s ease;
+    }
+
+    .primary-btn {
+      color: #fff;
+      background: linear-gradient(135deg, var(--orange), var(--orange-2));
+      box-shadow: 0 14px 28px rgba(255, 122, 24, 0.26);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px rgba(255, 122, 24, 0.34);
+    }
+
+    .secondary-btn {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 122, 24, 0.36);
+      background: rgba(255, 122, 24, 0.11);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(680px, calc(100% - 28px));
+      min-height: var(--nav-height);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      padding: 10px;
+      border-radius: 28px;
+      background: rgba(10, 15, 26, 0.88);
+      border: 1px solid var(--border);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(24px);
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      gap: 5px;
+      padding: 9px 8px;
+      border-radius: 20px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.82rem;
+      transition: 0.22s ease;
+    }
+
+    .nav-item i {
+      font-size: 1.3rem;
+    }
+
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-item.active {
+      color: var(--orange);
+      background: rgba(255, 122, 24, 0.13);
+      box-shadow: inset 0 0 0 1px rgba(255, 122, 24, 0.18);
+    }
+
+    .empty-state {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+    }
+
+    @media (min-width: 1180px) {
+      .bottom-nav {
+        left: 22px;
+        top: 150px;
+        bottom: auto;
+        transform: none;
+        width: 92px;
+        min-height: auto;
+        grid-template-columns: 1fr;
+        border-radius: 28px;
+      }
+
+      .nav-item {
+        min-height: 72px;
+        font-size: 0.74rem;
+      }
+
+      .app-shell {
+        padding-left: 130px;
+        padding-bottom: 42px;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .right-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stops-panel {
+        grid-column: 1 / -1;
+      }
+
+      .stops-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        padding: 12px 12px 110px;
+      }
+
+      .top-header {
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        border-radius: 22px;
+      }
+
+      .search-wrap {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .header-actions {
+        gap: 7px;
+      }
+
+      .user-mini {
+        display: none;
+      }
+
+      .hero-top {
+        grid-template-columns: 1fr;
+        padding: 18px;
+      }
+
+      .quick-actions {
+        flex-wrap: wrap;
+      }
+
+      .action-btn {
+        flex: 1;
+        min-width: 96px;
+      }
+
+      .map-shell {
+        height: 520px;
+        min-height: 520px;
+        margin: 0 18px 20px;
+      }
+
+      #map {
+        min-height: 520px;
+      }
+
+      .feature-grid,
+      .two-col,
+      .right-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card {
+        min-height: 220px;
+      }
+
+      .stops-list {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-nav {
+        bottom: 10px;
+        border-radius: 24px;
+      }
+
+      .nav-item span {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .brand h1 {
+        font-size: 1.4rem;
+      }
+
+      .brand-icon,
+      .icon-btn {
+        width: 42px;
+        height: 42px;
+      }
+
+      .header-actions .icon-btn:nth-child(2) {
+        display: none;
+      }
+
+      .author-row {
+        align-items: flex-start;
+      }
+
+      .author-photo {
+        width: 64px;
+        height: 64px;
+      }
+
+      .meta-line {
+        font-size: 0.88rem;
+      }
+
+      .rating-line {
+        font-size: 0.86rem;
+      }
+
+      .itinerary-title h3 {
+        font-size: 2.2rem;
+      }
+
+      .map-shell {
+        height: 470px;
+        min-height: 470px;
+        margin: 0 14px 18px;
+        border-radius: 22px;
+      }
+
+      #map {
+        min-height: 470px;
+      }
+
+      .map-overlay {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .floating-chip {
+        justify-content: center;
+      }
+
+      .panel-padding {
+        padding: 17px;
+      }
+
+      .stat-pill {
+        flex: 1 1 calc(50% - 10px);
+      }
+
+      .weather-card {
+        align-items: flex-start;
+      }
+
+      .bottom-nav {
+        padding: 8px;
+      }
+
+      .nav-item {
+        padding: 8px 4px;
+      }
+
+      .nav-item i {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="top-header">
+      <a class="brand" href="#">
+        <div class="brand-icon">
+          <i class="fa-solid fa-route"></i>
+        </div>
+        <h1>OneWay</h1>
+      </a>
+
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="globalSearch" type="search" placeholder="Cerca città, percorsi, luoghi..." />
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="Notifiche">
+          <i class="fa-regular fa-bell"></i>
+          <span class="notification-dot"></span>
+        </button>
+        <button class="icon-btn" aria-label="Impostazioni">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <div class="user-mini" title="Profilo utente">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt="Profilo utente" />
+        </div>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="left-stack">
+        <section class="hero-card">
+          <div class="hero-top">
+            <div>
+              <div class="author-row">
+                <div class="author-photo">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80" alt="Marco Rossi" />
+                </div>
+
+                <div class="author-info">
+                  <h2>
+                    Marco Rossi
+                    <span class="badge">
+                      <i class="fa-solid fa-compass"></i>
+                      Esploratore
+                    </span>
+                  </h2>
+                  <div class="meta-line">12 percorsi pubblicati · 8.230 follower</div>
+                  <div class="rating-line">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                    <span>4,9 · 128 recensioni</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="itinerary-title">
+                <h3>Roma 🇮🇹</h3>
+                <p>Itinerario storico e gastronomico – 1 giorno</p>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-pill orange">
+                  <i class="fa-solid fa-location-crosshairs"></i>
+                  <div class="stat-text">
+                    <small>Distanza</small>
+                    <strong>8,5 km</strong>
+                  </div>
+                </div>
+
+                <div class="stat-pill blue">
+                  <i class="fa-regular fa-clock"></i>
+                  <div class="stat-text">
+                    <small>Durata</small>
+                    <strong>6-8 ore</strong>
+                  </div>
+                </div>
+
+                <div class="stat-pill green">
+                  <i class="fa-solid fa-list-check"></i>
+                  <div class="stat-text">
+                    <small>Tappe</small>
+                    <strong>8</strong>
+                  </div>
+                </div>
+
+                <div class="stat-pill purple">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <div class="stat-text">
+                    <small>Dislivello</small>
+                    <strong>+120 m</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-actions">
+              <button id="saveBtn" class="action-btn">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>Salva</span>
+              </button>
+              <button id="shareBtn" class="action-btn">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                <span>Condividi</span>
+              </button>
+              <button id="downloadBtn" class="action-btn">
+                <i class="fa-solid fa-download"></i>
+                <span>Scarica</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="map-shell">
+            <div id="map"></div>
+
+            <div class="map-overlay">
+              <button id="view3dBtn" class="floating-chip">
+                <i class="fa-solid fa-cube"></i>
+                Vista 3D
+              </button>
+
+              <button id="trafficBtn" class="floating-chip traffic-toggle">
+                <span>Traffico</span>
+                <span class="switch" id="trafficSwitch">
+                  <span></span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card panel-padding">
+          <div class="section-title">
+            <h3>Tappe in evidenza</h3>
+            <a href="#">Vedi tutte <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div
+                class="feature-bg"
+                style="background-image: url('https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=900&q=80');"
+              ></div>
+              <div class="feature-content">
+                <h4>Colosseo</h4>
+                <p>Biglietto online consigliato</p>
+                <div class="feature-rating">
+                  <i class="fa-solid fa-star"></i>
+                  4,8
+                </div>
+              </div>
+              <div class="feature-tag">
+                <i class="fa-solid fa-ticket"></i>
+              </div>
+            </article>
+
+            <article class="feature-card">
+              <div
+                class="feature-bg"
+                style="background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80');"
+              ></div>
+              <div class="feature-content">
+                <h4>Ristorante Da Enzo</h4>
+                <p>Trastevere · Cucina Romana</p>
+                <div class="feature-rating">
+                  <i class="fa-solid fa-star"></i>
+                  4,7
+                </div>
+              </div>
+              <div class="feature-tag">
+                <i class="fa-solid fa-utensils"></i>
+              </div>
+            </article>
+
+            <article class="feature-card">
+              <div
+                class="feature-bg"
+                style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80');"
+              ></div>
+              <div class="feature-content">
+                <h4>Hotel Artemide</h4>
+                <p>Near Termini · 4 stelle</p>
+                <div class="feature-rating">
+                  <i class="fa-solid fa-star"></i>
+                  4,6
+                </div>
+              </div>
+              <div class="feature-tag" style="color: var(--purple);">
+                <i class="fa-solid fa-bed"></i>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="two-col">
+          <article class="panel-card panel-padding">
+            <div class="section-title">
+              <h3>Consigli dell’autore</h3>
+            </div>
+
+            <div class="author-tip">
+              <div class="tip-avatar">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt="Marco Rossi" />
+              </div>
+              <p class="quote">
+                <i class="fa-solid fa-quote-left"></i>
+                Inizia presto per goderti il Colosseo con meno fila. Il tramonto dal Giardino degli Aranci è imperdibile.
+                <i class="fa-solid fa-quote-right"></i>
+              </p>
+            </div>
+          </article>
+
+          <article class="panel-card panel-padding">
+            <div class="section-title">
+              <h3>Meteo</h3>
+            </div>
+
+            <div class="weather-card">
+              <i class="fa-solid fa-sun weather-icon"></i>
+              <div class="weather-main">
+                <strong>22°C</strong>
+                <span>Soleggiato</span>
+                <div class="weather-meta">
+                  <span>Umidità <b>45%</b></span>
+                  <span>Vento <b>11 km/h</b></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <aside class="right-stack">
+        <section class="panel-card panel-padding stops-panel">
+          <div class="section-title">
+            <h3>Tappe itinerario</h3>
+            <button id="resetFilters">Reset</button>
+          </div>
+
+          <div class="filters" id="filters">
+            <button class="filter-btn active" data-filter="Tutto">Tutto</button>
+            <button class="filter-btn" data-filter="Musei">Musei</button>
+            <button class="filter-btn" data-filter="Cibo">Cibo</button>
+            <button class="filter-btn" data-filter="Panorami">Panorami</button>
+            <button class="filter-btn" data-filter="Monumenti">Monumenti</button>
+          </div>
+
+          <div class="stops-list" id="stopsList"></div>
+        </section>
+
+        <section class="panel-card panel-padding">
+          <div class="section-title">
+            <h3>Azioni rapide</h3>
+          </div>
+
+          <div class="cta-row">
+            <button id="followBtn" class="primary-btn">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Segui autore</span>
+            </button>
+
+            <button id="reviewBtn" class="secondary-btn">
+              <i class="fa-regular fa-star"></i>
+              <span>Lascia recensione</span>
+            </button>
+
+            <button class="secondary-btn">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>Apri percorso</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-card panel-padding">
+          <div class="section-title">
+            <h3>Community</h3>
+            <a href="#">128 recensioni</a>
+          </div>
+
+          <div class="reviews-grid">
+            <article class="review-card">
+              <div class="review-avatar">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80" alt="Giulia" />
+              </div>
+              <div>
+                <div class="review-head">
+                  <strong>Giulia B.</strong>
+                  <span class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                  </span>
+                </div>
+                <p>Percorso perfetto per vedere Roma in un giorno.</p>
+              </div>
+            </article>
+
+            <article class="review-card">
+              <div class="review-avatar">
+                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=160&q=80" alt="Luca" />
+              </div>
+              <div>
+                <div class="review-head">
+                  <strong>Luca M.</strong>
+                  <span class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                  </span>
+                </div>
+                <p>Ottimi consigli per pranzo e cena.</p>
+              </div>
+            </article>
+
+            <article class="review-card">
+              <div class="review-avatar">
+                <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=160&q=80" alt="Andrea" />
+              </div>
+              <div>
+                <div class="review-head">
+                  <strong>Andrea R.</strong>
+                  <span class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                  </span>
+                </div>
+                <p>La mappa interattiva è stata utilissima.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigazione principale">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-compass"></i>
+      <span>Esplora</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-regular fa-map"></i>
+      <span>I miei percorsi</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-regular fa-heart"></i>
+      <span>Preferiti</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-regular fa-user"></i>
+      <span>Profilo</span>
+    </a>
+  </nav>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const stops = [
+      {
+        id: 1,
+        name: "Basilica di San Pietro",
+        time: "08:30-10:00",
+        category: "Museo/Chiesa",
+        filterCategory: "Monumenti",
+        description: "Partenza iconica dal cuore del Vaticano, ideale nelle prime ore del mattino.",
+        rating: "4,9",
+        coords: [41.9022, 12.4539],
+        icon: "fa-landmark"
+      },
+      {
+        id: 2,
+        name: "Castel Sant’Angelo",
+        time: "10:15-11:00",
+        category: "Museo",
+        filterCategory: "Musei",
+        description: "Fortezza storica con vista sul Tevere e collegamento ideale verso il centro.",
+        rating: "4,7",
+        coords: [41.9031, 12.4663],
+        icon: "fa-building-columns"
+      },
+      {
+        id: 3,
+        name: "Piazza Navona",
+        time: "11:15-12:00",
+        category: "Punto di interesse",
+        filterCategory: "Monumenti",
+        description: "Una delle piazze più scenografiche di Roma, perfetta per una pausa fotografica.",
+        rating: "4,8",
+        coords: [41.8992, 12.4731],
+        icon: "fa-camera-retro"
+      },
+      {
+        id: 4,
+        name: "Pantheon",
+        time: "12:15-13:00",
+        category: "Museo",
+        filterCategory: "Musei",
+        description: "Capolavoro dell’architettura romana, tappa essenziale del centro storico.",
+        rating: "4,9",
+        coords: [41.8986, 12.4769],
+        icon: "fa-building-columns"
+      },
+      {
+        id: 5,
+        name: "Colosseo",
+        time: "15:00-16:30",
+        category: "Attrazione principale",
+        filterCategory: "Monumenti",
+        description: "Il simbolo di Roma. Consigliato prenotare il biglietto online in anticipo.",
+        rating: "4,8",
+        coords: [41.8902, 12.4922],
+        icon: "fa-ticket"
+      },
+      {
+        id: 6,
+        name: "Foro Romano",
+        time: "16:45-17:30",
+        category: "Sito archeologico",
+        filterCategory: "Monumenti",
+        description: "Passeggiata tra le rovine dell’antica Roma, a pochi passi dal Colosseo.",
+        rating: "4,7",
+        coords: [41.8925, 12.4853],
+        icon: "fa-archway"
+      },
+      {
+        id: 7,
+        name: "Trastevere",
+        time: "19:30-21:00",
+        category: "Cena",
+        filterCategory: "Cibo",
+        description: "Quartiere vivace e autentico, perfetto per una cena romana tradizionale.",
+        rating: "4,7",
+        coords: [41.8898, 12.4706],
+        icon: "fa-utensils"
+      },
+      {
+        id: 8,
+        name: "Giardino degli Aranci",
+        time: "21:15-21:45",
+        category: "Vista panoramica",
+        filterCategory: "Panorami",
+        description: "Chiusura romantica con vista panoramica sulla città al tramonto.",
+        rating: "4,8",
+        coords: [41.8857, 12.4801],
+        icon: "fa-binoculars"
+      }
+    ];
+
+    let map;
+    let routeLine;
+    let selectedStopId = null;
+    let activeFilter = "Tutto";
+
+    const markers = new Map();
+    const stopsList = document.getElementById("stopsList");
+    const searchInput = document.getElementById("globalSearch");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      renderStops();
+      initUIEvents();
+    });
+
+    function initMap() {
+      if (!window.L) {
+        console.error("Leaflet non è stato caricato correttamente.");
+        return;
+      }
+
+      map = L.map("map", {
+        center: [41.8958, 12.4775],
+        zoom: 14,
+        zoomControl: true,
+        scrollWheelZoom: true
+      });
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap &copy; CARTO",
+        subdomains: "abcd",
+        maxZoom: 20
+      }).addTo(map);
+
+      const routeCoords = stops.map(stop => stop.coords);
+
+      routeLine = L.polyline(routeCoords, {
+        color: "#ff7a18",
+        weight: 7,
+        opacity: 0.95,
+        lineJoin: "round",
+        lineCap: "round"
+      }).addTo(map);
+
+      L.polyline(routeCoords, {
+        color: "#ffbe72",
+        weight: 2,
+        opacity: 0.95,
+        lineJoin: "round",
+        lineCap: "round"
+      }).addTo(map);
+
+      stops.forEach(stop => {
+        const markerIcon = L.divIcon({
+          className: "custom-number-marker",
+          html: `<div class="number-marker">${stop.id}</div>`,
+          iconSize: [38, 38],
+          iconAnchor: [19, 19],
+          popupAnchor: [0, -20]
+        });
+
+        const marker = L.marker(stop.coords, {
+          icon: markerIcon,
+          title: stop.name
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <div>
+            <div class="popup-title">${stop.id}. ${stop.name}</div>
+            <div class="popup-meta">
+              <strong>Orario:</strong> ${stop.time}<br>
+              <strong>Categoria:</strong> ${stop.category}
+            </div>
+            <div class="popup-desc">${stop.description}</div>
+            <div class="popup-rating">
+              <i class="fa-solid fa-star"></i> ${stop.rating}
+            </div>
+          </div>
+        `);
+
+        marker.on("click", () => {
+          selectStop(stop.id, true);
+        });
+
+        markers.set(stop.id, marker);
+      });
+
+      map.fitBounds(routeLine.getBounds(), {
+        padding: [55, 55]
+      });
+
+      setTimeout(() => {
+        map.invalidateSize();
+        map.fitBounds(routeLine.getBounds(), {
+          padding: [55, 55]
+        });
+      }, 350);
+    }
+
+    function renderStops() {
+      if (!stopsList) return;
+
+      const query = searchInput.value.trim().toLowerCase();
+
+      const visibleStops = stops.filter(stop => {
+        const matchesCategory =
+          activeFilter === "Tutto" || stop.filterCategory === activeFilter;
+
+        const matchesSearch =
+          !query ||
+          stop.name.toLowerCase().includes(query) ||
+          stop.category.toLowerCase().includes(query) ||
+          stop.filterCategory.toLowerCase().includes(query) ||
+          stop.description.toLowerCase().includes(query);
+
+        return matchesCategory && matchesSearch;
+      });
+
+      stopsList.innerHTML = "";
+
+      if (visibleStops.length === 0) {
+        stopsList.innerHTML = `
+          <div class="empty-state">
+            Nessuna tappa trovata. Prova a modificare ricerca o filtro.
+          </div>
+        `;
+        return;
+      }
+
+      visibleStops.forEach(stop => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "stop-card";
+        card.dataset.stopId = stop.id;
+
+        if (selectedStopId === stop.id) {
+          card.classList.add("selected");
+        }
+
+        card.innerHTML = `
+          <span class="stop-num">${stop.id}</span>
+
+          <span class="stop-main">
+            <strong>${stop.name}</strong>
+            <span>${stop.time} · ${stop.category}</span>
+          </span>
+
+          <span class="stop-icon">
+            <i class="fa-solid ${stop.icon}"></i>
+          </span>
+        `;
+
+        card.addEventListener("click", () => {
+          selectStop(stop.id, true);
+        });
+
+        stopsList.appendChild(card);
+      });
+    }
+
+    function selectStop(stopId, openPopup = false) {
+      const stop = stops.find(item => item.id === stopId);
+
+      if (!stop || !map) return;
+
+      selectedStopId = stopId;
+
+      map.flyTo(stop.coords, 16, {
+        animate: true,
+        duration: 0.8
+      });
+
+      const marker = markers.get(stopId);
+
+      if (openPopup && marker) {
+        setTimeout(() => {
+          marker.openPopup();
+        }, 500);
+      }
+
+      renderStops();
+
+      const selectedCard = document.querySelector(`.stop-card[data-stop-id="${stopId}"]`);
+
+      if (selectedCard) {
+        selectedCard.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+      }
+    }
+
+    function initUIEvents() {
+      document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.classList.remove("active");
+          });
+
+          button.classList.add("active");
+          activeFilter = button.dataset.filter;
+          selectedStopId = null;
+
+          renderStops();
+        });
+      });
+
+      document.getElementById("resetFilters").addEventListener("click", () => {
+        activeFilter = "Tutto";
+        selectedStopId = null;
+        searchInput.value = "";
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.filter === "Tutto");
+        });
+
+        renderStops();
+
+        if (map && routeLine) {
+          map.fitBounds(routeLine.getBounds(), {
+            padding: [55, 55]
+          });
+        }
+      });
+
+      searchInput.addEventListener("input", () => {
+        selectedStopId = null;
+        renderStops();
+      });
+
+      const saveBtn = document.getElementById("saveBtn");
+
+      saveBtn.addEventListener("click", () => {
+        saveBtn.classList.toggle("active");
+        const isSaved = saveBtn.classList.contains("active");
+
+        saveBtn.innerHTML = isSaved
+          ? `<i class="fa-solid fa-bookmark"></i><span>Salvato</span>`
+          : `<i class="fa-regular fa-bookmark"></i><span>Salva</span>`;
+      });
+
+      const followBtn = document.getElementById("followBtn");
+
+      followBtn.addEventListener("click", () => {
+        followBtn.classList.toggle("active");
+        const followed = followBtn.classList.contains("active");
+
+        followBtn.innerHTML = followed
+          ? `<i class="fa-solid fa-user-check"></i><span>Seguito</span>`
+          : `<i class="fa-solid fa-user-plus"></i><span>Segui autore</span>`;
+
+        followBtn.style.background = followed
+          ? "linear-gradient(135deg, #55d37a, #2cbf67)"
+          : "linear-gradient(135deg, var(--orange), var(--orange-2))";
+      });
+
+      document.getElementById("shareBtn").addEventListener("click", async () => {
+        const shareData = {
+          title: "OneWay — Roma",
+          text: "Scopri questo itinerario storico e gastronomico di Roma su OneWay.",
+          url: window.location.href
+        };
+
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+          } catch (error) {
+            console.log("Condivisione annullata.");
+          }
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          temporaryButtonMessage("shareBtn", "Copiato!");
+        }
+      });
+
+      document.getElementById("downloadBtn").addEventListener("click", () => {
+        temporaryButtonMessage("downloadBtn", "Pronto!");
+      });
+
+      document.getElementById("reviewBtn").addEventListener("click", () => {
+        alert("Grazie! In una versione completa qui si aprirebbe il form per lasciare una recensione.");
+      });
+
+      document.getElementById("view3dBtn").addEventListener("click", () => {
+        alert("Vista 3D dimostrativa: in una versione completa potrebbe integrarsi con mappe 3D o street view.");
+      });
+
+      const trafficSwitch = document.getElementById("trafficSwitch");
+
+      document.getElementById("trafficBtn").addEventListener("click", () => {
+        trafficSwitch.classList.toggle("active");
+      });
+
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.addEventListener("click", event => {
+          event.preventDefault();
+
+          document.querySelectorAll(".nav-item").forEach(nav => {
+            nav.classList.remove("active");
+          });
+
+          item.classList.add("active");
+        });
+      });
+
+      window.addEventListener("resize", () => {
+        if (map) {
+          setTimeout(() => {
+            map.invalidateSize();
+          }, 200);
+        }
+      });
+    }
+
+    function temporaryButtonMessage(buttonId, message) {
+      const btn = document.getElementById(buttonId);
+      const original = btn.innerHTML;
+
+      btn.classList.add("active");
+      btn.innerHTML = `<i class="fa-solid fa-check"></i><span>${message}</span>`;
+
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.classList.remove("active");
+      }, 1400);
+    }
+  </script>
+</body>
 </html>
+```
+
